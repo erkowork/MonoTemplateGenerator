@@ -34,13 +34,69 @@ export const generatePDF = async (data: TemplateData): Promise<void> => {
   const stepMm: number = circumferenceMm / points;
   const angleStep: number = 360 / points;
 
+  // Header and Info Box (Neutral Style)
+  const infoBoxY = 15;
+  const infoBoxHeight = 25;
+  const infoBoxWidth = 180;
+  
+  // Draw a light gray box for info
+  doc.setFillColor(245, 245, 245);
+  doc.roundedRect(15, infoBoxY, infoBoxWidth, infoBoxHeight, 3, 3, 'F');
+  doc.setDrawColor(220, 220, 220);
+  doc.setLineWidth(0.2);
+  doc.roundedRect(15, infoBoxY, infoBoxWidth, infoBoxHeight, 3, 3, 'D');
+
+  // Title in the box
+  doc.setTextColor(40, 40, 40);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Rohr-Markierungsschablone (Maßstab 1:1)`, 22, infoBoxY + 8);
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(`Durchmesser: ${data.diameter.toFixed(2)}${unit} | Umfang: ${circumference.toFixed(2)}${unit} | Punkte: ${points}`, 22, infoBoxY + 15);
+  
+  doc.setTextColor(180, 0, 0);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.text(`WICHTIG: Drucken Sie A3 bei 100% Skalierung (Tatsächliche Größe). Mit Lineal prüfen!`, 22, infoBoxY + 21);
+
+  // Simple Graphic Representation (Neutral)
+  const graphicX = 210;
+  const graphicY = 27;
+  const graphicSize = 20;
+  
+  // Draw a circle for cross-section
+  doc.setDrawColor(150, 150, 150);
+  doc.setLineWidth(0.5);
+  doc.circle(graphicX, graphicY, graphicSize / 2, 'D');
+  
+  // Draw angle points on the circle
+  for (let i = 0; i < points; i++) {
+    const angle = (i * 360) / points;
+    const rad = (angle - 90) * (Math.PI / 180);
+    const x1 = graphicX + (graphicSize / 2) * Math.cos(rad);
+    const y1 = graphicY + (graphicSize / 2) * Math.sin(rad);
+    const x2 = graphicX + (graphicSize / 2 + 2) * Math.cos(rad);
+    const y2 = graphicY + (graphicSize / 2 + 2) * Math.sin(rad);
+    
+    doc.setDrawColor(100, 100, 100);
+    doc.setLineWidth(0.2);
+    doc.line(x1, y1, x2, y2);
+    
+    if (points <= 12) {
+      doc.setFontSize(5);
+      doc.text(`${angle.toFixed(0)}°`, graphicX + (graphicSize / 2 + 4) * Math.cos(rad), graphicY + (graphicSize / 2 + 4) * Math.sin(rad), { align: 'center' });
+    }
+  }
+
   // Draw stacked segments
   for (let s = 0; s < numSegments; s++) {
     const segmentStart = s * maxSegmentWidth;
     const segmentEnd = Math.min((s + 1) * maxSegmentWidth, circumferenceMm);
     const segmentWidth = segmentEnd - segmentStart;
     
-    const currentY = marginTop + (s * (stripHeight + verticalGap));
+    const currentY = marginTop + 15 + (s * (stripHeight + verticalGap));
 
     // Draw the 2cm strip (rectangle)
     doc.setDrawColor(200, 200, 200);
@@ -89,14 +145,14 @@ export const generatePDF = async (data: TemplateData): Promise<void> => {
       doc.setDrawColor(255, 0, 0);
       doc.setLineWidth(0.2);
       doc.line(marginX + segmentWidth, currentY - 2, marginX + segmentWidth, currentY + stripHeight + 2);
-      doc.text("CUT & GLUE ->", marginX + segmentWidth, currentY - 3, { align: 'right' });
+      doc.text("SCHNEIDEN & KLEBEN ->", marginX + segmentWidth, currentY - 3, { align: 'right' });
     }
     if (s > 0) {
       // Left side indicator
       doc.setDrawColor(255, 0, 0);
       doc.setLineWidth(0.2);
       doc.line(marginX, currentY - 2, marginX, currentY + stripHeight + 2);
-      doc.text("<- GLUE HERE", marginX, currentY - 3, { align: 'left' });
+      doc.text("<- HIER KLEBEN", marginX, currentY - 3, { align: 'left' });
     }
   }
 
@@ -111,33 +167,19 @@ export const generatePDF = async (data: TemplateData): Promise<void> => {
   });
 
   // Position table below segments or at the bottom
-  const tableY = marginTop + (numSegments * (stripHeight + verticalGap)) + 10;
+  const tableY = marginTop + 15 + (numSegments * (stripHeight + verticalGap)) + 10;
   
   autoTable(doc, {
     startY: tableY,
-    head: [['Angle', 'Position']],
+    head: [['Winkel', 'Position']],
     body: tableData,
     theme: 'grid',
     styles: { fontSize: 8, cellPadding: 1 },
-    headStyles: { fillColor: [123, 63, 0], textColor: [255, 255, 255] }, // Coffee theme colors
+    headStyles: { fillColor: [100, 100, 100], textColor: [255, 255, 255] }, // Neutral gray for PDF
     margin: { left: marginX },
     tableWidth: 60
   });
 
-  // Header and Info
-  doc.setTextColor(0, 0, 0);
-  doc.setFontSize(14);
-  doc.setFont("helvetica", "bold");
-  doc.text(`Cylinder Marking Template (1:1 Scale)`, 15, 15);
-  
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.text(`Diameter: ${data.diameter.toFixed(2)}${unit} | Circumference: ${circumference.toFixed(2)}${unit}`, 15, 22);
-  
-  doc.setTextColor(255, 0, 0);
-  doc.setFont("helvetica", "bold");
-  doc.text(`IMPORTANT: Print A3 at 100% Scale (Actual Size). Verify with a ruler.`, 15, 28);
-
-  const fileName = `Cylinder_Template_${data.diameter}${unit}.pdf`;
+  const fileName = `Rohr_Schablone_${data.diameter}${unit}.pdf`;
   doc.save(fileName);
 };

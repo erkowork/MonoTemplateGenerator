@@ -121,7 +121,7 @@ export default function App() {
     { id: 'beton', label: 'Beton', color: '#bfc9d1' },
     { id: 'gold', label: 'Gold', color: '#ffd93d' },
     { id: 'mint', label: 'Mint', color: '#6e5034' },
-    { id: 'night', label: 'Night', color: '#481e14' },
+    { id: 'night', label: 'Night', color: '#d65a31' },
   ];
 
   const containerVariants = {
@@ -145,9 +145,9 @@ export default function App() {
   return (
     <motion.div 
       key={theme}
-      initial={{ opacity: 0.8, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      initial={{ clipPath: 'circle(0% at 0% 0%)', opacity: 0.9 }}
+      animate={{ clipPath: 'circle(150% at 0% 0%)', opacity: 1 }}
+      transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
       className="min-h-screen p-4 md:p-8 flex flex-col items-center justify-start max-w-2xl mx-auto"
     >
       {/* Theme Selector */}
@@ -178,8 +178,8 @@ export default function App() {
         variants={itemVariants}
         className="w-full text-center mb-8"
       >
-        <h1 className="text-4xl font-bold tracking-tight mb-2">Cylinder Angle</h1>
-        <p className="text-[var(--text-muted)] text-sm uppercase tracking-widest font-medium">Template Generator</p>
+        <h1 className="text-4xl font-bold tracking-tight mb-2">Zylinder-Winkel</h1>
+        <p className="text-[var(--text-muted)] text-sm uppercase tracking-widest font-medium">Vorlagen Generator</p>
       </motion.header>
 
       {/* Main Control Panel */}
@@ -192,7 +192,7 @@ export default function App() {
           {/* Diameter Input */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-[var(--text-muted)] uppercase ml-1 flex items-center gap-2">
-              <Maximize2 size={12} /> Diameter
+              <Maximize2 size={12} /> Durchmesser
             </label>
             <div className="relative flex items-center">
               <input
@@ -216,7 +216,7 @@ export default function App() {
           {/* Points Input */}
           <div className="space-y-2">
             <label className="text-xs font-semibold text-[var(--text-muted)] uppercase ml-1 flex items-center gap-2">
-              <Settings size={12} /> Angle Points
+              <Settings size={12} /> Winkel-Punkte
             </label>
             <div className="flex gap-2">
               {[4, 8, 12, 16].map((p: number) => (
@@ -250,7 +250,7 @@ export default function App() {
               disabled={!diameter}
               className="glass-button flex-1 flex items-center justify-center gap-2"
             >
-              Calculate <ChevronRight size={18} />
+              Berechnen <ChevronRight size={18} />
             </motion.button>
             <motion.button 
               whileHover={{ scale: 1.05 }}
@@ -282,23 +282,23 @@ export default function App() {
             >
               <div className="flex flex-col md:flex-row items-center justify-center gap-8 w-full">
                 <div className="flex flex-col items-center">
-                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-4">3D Preview</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-4">3D-Vorschau</p>
                   <CylinderVisualizer points={points} diameter={parseFloat(diameter)} />
                 </div>
                 <div className="w-px h-32 bg-white/10 hidden md:block" />
                 <div className="flex flex-col items-center">
-                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-4">Angle Cross-Section</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-4">Winkel-Querschnitt</p>
                   <CircularVisualizer points={points} diameter={parseFloat(diameter)} />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-8 w-full mt-12">
                 <div className="text-center">
-                  <p className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">Circumference</p>
+                  <p className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">Umfang</p>
                   <p className="text-2xl font-light">{calculations.circumference.toFixed(2)}<span className="text-sm ml-1 text-[var(--text-muted)]">{unit}</span></p>
                 </div>
                 <div className="text-center">
-                  <p className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">Step Distance</p>
+                  <p className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">Schrittweite</p>
                   <p className="text-2xl font-light">{calculations.stepDistance.toFixed(2)}<span className="text-sm ml-1 text-[var(--text-muted)]">{unit}</span></p>
                 </div>
               </div>
@@ -312,7 +312,7 @@ export default function App() {
               className="glass-panel rounded-[2.5rem] p-8"
             >
               <h3 className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-4 flex items-center gap-2">
-                <Ruler size={12} /> Marking Positions
+                <Ruler size={12} /> Markierungs-Positionen
               </h3>
               <div className="space-y-3">
                 {calculations.markingPoints.map((p, i: number) => (
@@ -354,7 +354,7 @@ export default function App() {
                       className="flex items-center gap-2"
                     >
                       <Loader2 className="animate-spin" size={20} />
-                      Generating Template...
+                      Erstelle Vorlage...
                     </motion.div>
                   ) : pdfSuccess ? (
                     <motion.div
@@ -365,7 +365,7 @@ export default function App() {
                       className="flex items-center gap-2 text-emerald-400"
                     >
                       <CheckCircle2 size={20} />
-                      Template Ready!
+                      Vorlage bereit!
                     </motion.div>
                   ) : (
                     <motion.div
@@ -376,7 +376,7 @@ export default function App() {
                       className="flex items-center gap-3"
                     >
                       <FileText size={20} />
-                      Generate 1:1 PDF Template
+                      1:1 PDF Vorlage erstellen
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -393,7 +393,7 @@ export default function App() {
               <div className="flex items-start gap-3 p-4 bg-white/5 rounded-2xl border border-white/10">
                 <Info size={16} className="text-[var(--text-muted)] mt-0.5 shrink-0" />
                 <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-                  The PDF is generated at 1:1 scale. Ensure "Actual Size" or "Scale: 100%" is selected in your printer settings.
+                  Das PDF wird im Maßstab 1:1 erstellt. Stellen Sie sicher, dass in Ihren Druckeinstellungen "Tatsächliche Größe" oder "Skalierung: 100%" ausgewählt ist.
                 </p>
               </div>
             </motion.div>
@@ -407,7 +407,7 @@ export default function App() {
         className="mt-12 mb-8 text-center"
       >
         <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-[0.2em]">
-          Cylinder Angle Template - by GoldApps - copyright 2026
+          Rohr-Winkel Schablone - von GoldApps - copyright 2026
         </p>
       </motion.footer>
     </motion.div>

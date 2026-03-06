@@ -110,14 +110,14 @@
 }
 
 [data-theme="night"] {
-  --bg: #0c0c0c;
-  --panel: #481e14;
-  --accent: #9b3922;
-  --text: #f2613f;
-  --text-muted: rgba(242, 97, 63, 0.5);
-  --border: rgba(155, 57, 34, 0.3);
-  --btn-bg: #9b3922;
-  --btn-text: #0c0c0c;
+  --bg: #222831;
+  --panel: #393e46;
+  --accent: #d65a31;
+  --text: #eeeeee;
+  --text-muted: rgba(238, 238, 238, 0.5);
+  --border: rgba(214, 90, 49, 0.3);
+  --btn-bg: #d65a31;
+  --btn-text: #eeeeee;
   font-family: var(--font-night);
 }
 
