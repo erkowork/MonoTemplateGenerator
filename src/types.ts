@@ -1,5 +1,7 @@
 export type Unit = 'cm' | 'mm';
 
+export type ThemeType = 'coffee' | 'matcha' | 'cosy' | 'sunset' | 'beton' | 'gold' | 'mint' | 'night';
+
 export interface MarkingPoint {
   angle: number;
   position: number;
