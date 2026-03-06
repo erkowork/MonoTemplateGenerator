@@ -407,7 +407,7 @@ export default function App() {
         className="mt-12 mb-8 text-center"
       >
         <p className="text-[10px] text-[var(--text-muted)] uppercase tracking-[0.2em]">
-          Rohr-Winkel Schablone - von GoldApps - copyright 2026
+          Zylinder-Winkel Generator - von GoldApps - copyright 2026
         </p>
       </motion.footer>
     </motion.div>
