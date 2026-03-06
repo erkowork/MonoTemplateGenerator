@@ -1,0 +1,17 @@
+{
+  "name": "Cylinder Angle Template",
+  "short_name": "CylinderAngle",
+  "description": "1:1 Scale Cylinder Marking Template Generator",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#222831",
+  "theme_color": "#948979",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

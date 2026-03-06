@@ -14,74 +14,84 @@ interface Props {
   diameter: number;
 }
 
-export const CylinderVisualizer: React.FC<Props> = ({ points }) => {
-  const radius: number = 80;
-  const centerX: number = 100;
-  const centerY: number = 100;
+export const CylinderVisualizer: React.FC<Props> = ({ points, diameter }) => {
+  const centerX = 100;
+  const centerY = 100;
+  const ellipseRadiusX = 60;
+  const ellipseRadiusY = 25;
 
-  const markers: Marker[] = Array.from({ length: points }).map((_, i) => {
-    const angle: number = (i * 360) / points;
-    const angleRad: number = (angle - 90) * (Math.PI / 180);
-    const x: number = centerX + radius * Math.cos(angleRad);
-    const y: number = centerY + radius * Math.sin(angleRad);
-    const labelX: number = centerX + (radius + 15) * Math.cos(angleRad);
-    const labelY: number = centerY + (radius + 15) * Math.sin(angleRad);
-    
-    return { x, y, labelX, labelY, angle };
+  const markers = Array.from({ length: points }).map((_, i) => {
+    const angle = (i * 360) / points;
+    const angleRad = (angle - 90) * (Math.PI / 180);
+    const x = centerX + ellipseRadiusX * Math.cos(angleRad);
+    const y = centerY + ellipseRadiusY * Math.sin(angleRad);
+    return { x, y, angle };
   });
 
   return (
-    <div className="w-full aspect-square max-w-[300px] mx-auto">
-      <svg viewBox="0 0 200 200" className="w-full h-full">
-        {/* Outer Circle */}
-        <circle
+    <div className="w-full aspect-square max-w-[200px] mx-auto">
+      <svg viewBox="0 0 200 200" className="w-full h-full overflow-visible">
+        {/* Back half of bottom ellipse */}
+        <path
+          d={`M ${centerX - ellipseRadiusX} ${centerY + 60} A ${ellipseRadiusX} ${ellipseRadiusY} 0 0 0 ${centerX + ellipseRadiusX} ${centerY + 60}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+          strokeDasharray="4 2"
+          className="opacity-20"
+        />
+
+        {/* Vertical lines */}
+        <line x1={centerX - ellipseRadiusX} y1={centerY} x2={centerX - ellipseRadiusX} y2={centerY + 60} stroke="currentColor" strokeWidth="2" className="opacity-20" />
+        <line x1={centerX + ellipseRadiusX} y1={centerY} x2={centerX + ellipseRadiusX} y2={centerY + 60} stroke="currentColor" strokeWidth="2" className="opacity-20" />
+
+        {/* Front half of bottom ellipse */}
+        <path
+          d={`M ${centerX - ellipseRadiusX} ${centerY + 60} A ${ellipseRadiusX} ${ellipseRadiusY} 0 0 1 ${centerX + ellipseRadiusX} ${centerY + 60}`}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          className="opacity-40"
+        />
+
+        {/* Top ellipse (Pipe mouth) */}
+        <ellipse
           cx={centerX}
           cy={centerY}
-          r={radius}
+          rx={ellipseRadiusX}
+          ry={ellipseRadiusY}
           fill="none"
-          stroke="rgba(255,255,255,0.2)"
-          strokeWidth="2"
+          stroke="currentColor"
+          strokeWidth="3"
+          className="opacity-60"
         />
-        
-        {/* Center Point */}
-        <circle cx={centerX} cy={centerY} r="2" fill="white" />
 
-        {/* Markers */}
-        {markers.map((m: Marker, i: number) => (
+        {/* Markers on the top edge */}
+        {markers.map((m, i) => (
           <g key={i}>
-            <motion.line
-              initial={{ opacity: 0, pathLength: 0 }}
-              animate={{ opacity: 1, pathLength: 1 }}
-              transition={{ delay: i * 0.05 }}
-              x1={centerX}
-              y1={centerY}
-              x2={m.x}
-              y2={m.y}
-              stroke="rgba(255,255,255,0.3)"
-              strokeWidth="1"
-              strokeDasharray="4 2"
-            />
             <motion.circle
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ delay: i * 0.05 + 0.3 }}
+              transition={{ delay: i * 0.05 }}
               cx={m.x}
               cy={m.y}
-              r="4"
-              fill="white"
-              className="drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+              r="3"
+              fill="var(--accent)"
             />
-            <text
-              x={m.labelX}
-              y={m.labelY}
-              fill="rgba(255,255,255,0.6)"
-              fontSize="10"
-              textAnchor="middle"
-              alignmentBaseline="middle"
-              className="font-mono"
-            >
-              {m.angle}°
-            </text>
+            {/* Vertical marking line on the cylinder surface */}
+            <motion.line
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ delay: 0.3 + i * 0.05 }}
+              x1={m.x}
+              y1={m.y}
+              x2={m.x}
+              y2={m.y + 40}
+              stroke="var(--accent)"
+              strokeWidth="1"
+              strokeDasharray="2 2"
+              className="opacity-40"
+            />
           </g>
         ))}
       </svg>

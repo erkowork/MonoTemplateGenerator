@@ -31,7 +31,7 @@
   --accent: #948979;
   --text: #dfd0b8;
   --text-muted: rgba(223, 208, 184, 0.5);
-  --border: rgba(148, 137, 121, 0.2);
+  --border: rgba(148, 137, 121, 0.3);
   --btn-bg: #948979;
   --btn-text: #222831;
   font-family: var(--font-coffee);
@@ -126,23 +126,21 @@ body {
   background-color: var(--bg);
   color: var(--text);
   min-height: 100vh;
-  transition: background-color 0.8s cubic-bezier(0.4, 0, 0.2, 1), color 0.8s ease;
+  transition: background-color 0.4s ease-out, color 0.4s ease-out;
 }
 
-.theme-transition-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-  background: radial-gradient(circle at var(--x) var(--y), var(--color) 0%, transparent 0%);
-  transition: background 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.theme-transition-active {
-  background: radial-gradient(circle at var(--x) var(--y), var(--color) 100%, transparent 100%);
+@media print {
+  @page {
+    size: A3 landscape;
+    margin: 0;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
 }
 
 .glass-panel {

@@ -1,72 +1,143 @@
 import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import { TemplateData } from "../types";
 
 /**
  * Generates a 1:1 scale PDF template for a cylinder.
- * Automatically selects A4 or A3 landscape based on the circumference.
+ * Stacks multiple segments on a single A3 page if the circumference is long.
  */
 export const generatePDF = async (data: TemplateData): Promise<void> => {
   // Simulate a small delay for the "wow" animation in UI
   await new Promise(resolve => setTimeout(resolve, 1500));
 
   const { circumference, points, unit } = data;
-  
   const circumferenceMm: number = unit === 'cm' ? circumference * 10 : circumference;
-  const format: 'a4' | 'a3' = circumferenceMm > 267 ? 'a3' : 'a4';
+  
+  // A3 dimensions
+  const pageWidth = 420;
+  const pageHeight = 297;
+  const marginX = 20;
+  const marginTop = 40;
+  const maxSegmentWidth = pageWidth - (marginX * 2); // 380mm usable width
+  
+  const numSegments = Math.ceil(circumferenceMm / maxSegmentWidth);
   
   const doc = new jsPDF({
     orientation: 'landscape',
     unit: 'mm',
-    format: format
+    format: 'a3'
   });
 
-  const pageWidth: number = doc.internal.pageSize.getWidth();
-  const pageHeight: number = doc.internal.pageSize.getHeight();
-  
-  const startX: number = (pageWidth - circumferenceMm) / 2;
-  const startY: number = pageHeight / 2;
-
-  doc.setLineWidth(0.5);
-  doc.line(startX, startY, startX + circumferenceMm, startY);
+  const stripHeight = 20; // 2cm thick strip
+  const verticalGap = 15; // Gap between stacked strips
 
   const stepMm: number = circumferenceMm / points;
   const angleStep: number = 360 / points;
 
-  for (let i = 0; i <= points; i++) {
-    const x: number = startX + (i * stepMm);
-    const angle: number = i * angleStep;
+  // Draw stacked segments
+  for (let s = 0; s < numSegments; s++) {
+    const segmentStart = s * maxSegmentWidth;
+    const segmentEnd = Math.min((s + 1) * maxSegmentWidth, circumferenceMm);
+    const segmentWidth = segmentEnd - segmentStart;
     
-    doc.line(x, startY - 5, x, startY + 5);
-    
-    doc.setFontSize(8);
-    doc.text(`${angle.toFixed(0)}°`, x, startY - 8, { align: 'center' });
-    
-    if (i < points) {
-      const currentPos: number = (i * stepMm) / (unit === 'cm' ? 10 : 1);
-      const nextPos: number = ((i + 1) * stepMm) / (unit === 'cm' ? 10 : 1);
+    const currentY = marginTop + (s * (stripHeight + verticalGap));
+
+    // Draw the 2cm strip (rectangle)
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.1);
+    doc.rect(marginX, currentY, segmentWidth, stripHeight);
+
+    // Draw the main center line
+    doc.setDrawColor(0, 0, 0);
+    doc.setLineWidth(0.5);
+    doc.line(marginX, currentY + (stripHeight / 2), marginX + segmentWidth, currentY + (stripHeight / 2));
+
+    // Draw markers and labels
+    for (let i = 0; i <= points; i++) {
+      const markerPosMm = i * stepMm;
       
-      doc.setFontSize(6);
-      doc.text(`${currentPos.toFixed(2)}${unit}`, x, startY + 8, { align: 'center' });
-      
-      if (i === points - 1) {
-        doc.text(`${nextPos.toFixed(2)}${unit}`, x + stepMm, startY + 8, { align: 'center' });
+      // Check if marker is in this segment
+      if (markerPosMm >= segmentStart && markerPosMm <= segmentEnd) {
+        const x = marginX + (markerPosMm - segmentStart);
+        const angle = i * angleStep;
+
+        // Draw vertical markers within the 2cm strip
+        doc.setDrawColor(0, 0, 0);
+        doc.setLineWidth(0.3);
+        doc.line(x, currentY, x, currentY + stripHeight);
+        
+        // Angle labels RIGHT of the line
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+        // Small offset to the right (2mm)
+        doc.text(`${angle.toFixed(0)}°`, x + 1, currentY + 7, { align: 'left' });
+        
+        // Position labels RIGHT of the line (lower half)
+        const currentPos: number = markerPosMm / (unit === 'cm' ? 10 : 1);
+        doc.setFontSize(6);
+        doc.setFont("helvetica", "normal");
+        doc.text(`${currentPos.toFixed(2)}${unit}`, x + 1, currentY + 16, { align: 'left' });
       }
+    }
+
+    // Cut/Glue indicators
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    if (s < numSegments - 1) {
+      // Right side indicator
+      doc.setDrawColor(255, 0, 0);
+      doc.setLineWidth(0.2);
+      doc.line(marginX + segmentWidth, currentY - 2, marginX + segmentWidth, currentY + stripHeight + 2);
+      doc.text("CUT & GLUE ->", marginX + segmentWidth, currentY - 3, { align: 'right' });
+    }
+    if (s > 0) {
+      // Left side indicator
+      doc.setDrawColor(255, 0, 0);
+      doc.setLineWidth(0.2);
+      doc.line(marginX, currentY - 2, marginX, currentY + stripHeight + 2);
+      doc.text("<- GLUE HERE", marginX, currentY - 3, { align: 'left' });
     }
   }
 
-  doc.setFontSize(10);
+  // Add Marking Positions Table
+  const tableData = Array.from({ length: points + 1 }).map((_, i) => {
+    const angle = (i * 360) / points;
+    const pos = (i * stepMm) / (unit === 'cm' ? 10 : 1);
+    return [
+      `${angle.toFixed(0)}°`,
+      `${pos.toFixed(2)} ${unit}`
+    ];
+  });
+
+  // Position table below segments or at the bottom
+  const tableY = marginTop + (numSegments * (stripHeight + verticalGap)) + 10;
+  
+  autoTable(doc, {
+    startY: tableY,
+    head: [['Angle', 'Position']],
+    body: tableData,
+    theme: 'grid',
+    styles: { fontSize: 8, cellPadding: 1 },
+    headStyles: { fillColor: [123, 63, 0], textColor: [255, 255, 255] }, // Coffee theme colors
+    margin: { left: marginX },
+    tableWidth: 60
+  });
+
+  // Header and Info
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(14);
   doc.setFont("helvetica", "bold");
-  doc.text(`Cylinder Marking Template (Scale 1:1)`, 15, 15);
+  doc.text(`Cylinder Marking Template (1:1 Scale)`, 15, 15);
   
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text(`Diameter: ${data.diameter.toFixed(2)}${unit}`, 15, 20);
-  doc.text(`Circumference: ${circumference.toFixed(2)}${unit}`, 15, 24);
-  doc.text(`Points: ${points} (Step: ${(circumference / points).toFixed(2)}${unit})`, 15, 28);
+  doc.setFontSize(9);
+  doc.text(`Diameter: ${data.diameter.toFixed(2)}${unit} | Circumference: ${circumference.toFixed(2)}${unit}`, 15, 22);
   
   doc.setTextColor(255, 0, 0);
-  doc.text(`IMPORTANT: Print at "Actual Size" (100% Scale). Verify with a ruler.`, 15, 34);
+  doc.setFont("helvetica", "bold");
+  doc.text(`IMPORTANT: Print A3 at 100% Scale (Actual Size). Verify with a ruler.`, 15, 28);
 
-  const fileName = `Cylinder_Template_${data.diameter}${unit}_${points}pts.pdf`;
+  const fileName = `Cylinder_Template_${data.diameter}${unit}.pdf`;
   doc.save(fileName);
 };

@@ -10,6 +10,7 @@ import {
   Ruler
 } from 'lucide-react';
 import { CylinderVisualizer } from './components/CylinderVisualizer';
+import { CircularVisualizer } from './components/CircularVisualizer';
 import { generatePDF } from './utils/pdfGenerator';
 import { Unit, CalculationResults, TemplateData, SavedState, ThemeType } from './types';
 import { Loader2, CheckCircle2 } from 'lucide-react';
@@ -107,34 +108,20 @@ export default function App() {
   };
 
   const handleThemeChange = (id: ThemeType, e: React.MouseEvent) => {
-    const x = e.clientX;
-    const y = e.clientY;
-    
-    const ripple = document.createElement('div');
-    ripple.className = 'theme-transition-overlay';
-    ripple.style.setProperty('--x', `${x}px`);
-    ripple.style.setProperty('--y', `${y}px`);
-    ripple.style.setProperty('--color', `var(--bg)`);
-    document.body.appendChild(ripple);
-    
-    requestAnimationFrame(() => {
-      ripple.classList.add('theme-transition-active');
-      setTheme(id);
-      setTimeout(() => {
-        ripple.remove();
-      }, 800);
-    });
+    // Soft transition: just set the theme and let CSS handle the smooth background change
+    // But to make it "dynamic", we can add a subtle scale effect to the main container
+    setTheme(id);
   };
 
   const themes: { id: ThemeType; label: string; color: string }[] = [
     { id: 'coffee', label: 'Coffee', color: '#948979' },
-    { id: 'matcha', label: 'Matcha', color: '#a27b5c' },
+    { id: 'matcha', label: 'Matcha', color: '#3f4f44' },
     { id: 'cosy', label: 'Cosy', color: '#b87c4c' },
     { id: 'sunset', label: 'Sunset', color: '#f08a5d' },
-    { id: 'beton', label: 'Beton', color: '#ff9b51' },
-    { id: 'gold', label: 'Gold', color: '#fa8112' },
-    { id: 'mint', label: 'Mint', color: '#cdb885' },
-    { id: 'night', label: 'Night', color: '#9b3922' },
+    { id: 'beton', label: 'Beton', color: '#bfc9d1' },
+    { id: 'gold', label: 'Gold', color: '#ffd93d' },
+    { id: 'mint', label: 'Mint', color: '#6e5034' },
+    { id: 'night', label: 'Night', color: '#481e14' },
   ];
 
   const containerVariants = {
@@ -157,10 +144,11 @@ export default function App() {
 
   return (
     <motion.div 
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-      className="min-h-screen p-4 md:p-8 flex flex-col items-center justify-start max-w-2xl mx-auto transition-all duration-500"
+      key={theme}
+      initial={{ opacity: 0.8, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="min-h-screen p-4 md:p-8 flex flex-col items-center justify-start max-w-2xl mx-auto"
     >
       {/* Theme Selector */}
       <motion.div 
@@ -286,14 +274,25 @@ export default function App() {
             transition={{ type: "spring", damping: 20, stiffness: 100 }}
             className="w-full space-y-6"
           >
-            {/* Visualizer */}
+            {/* Visualizers */}
             <motion.div 
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               className="glass-panel rounded-[2.5rem] p-8 flex flex-col items-center"
             >
-              <CylinderVisualizer points={points} diameter={parseFloat(diameter)} />
-              <div className="grid grid-cols-2 gap-8 w-full mt-8">
+              <div className="flex flex-col md:flex-row items-center justify-center gap-8 w-full">
+                <div className="flex flex-col items-center">
+                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-4">3D Preview</p>
+                  <CylinderVisualizer points={points} diameter={parseFloat(diameter)} />
+                </div>
+                <div className="w-px h-32 bg-white/10 hidden md:block" />
+                <div className="flex flex-col items-center">
+                  <p className="text-[10px] uppercase tracking-widest font-bold opacity-40 mb-4">Angle Cross-Section</p>
+                  <CircularVisualizer points={points} diameter={parseFloat(diameter)} />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-8 w-full mt-12">
                 <div className="text-center">
                   <p className="text-xs font-semibold text-[var(--text-muted)] uppercase mb-1">Circumference</p>
                   <p className="text-2xl font-light">{calculations.circumference.toFixed(2)}<span className="text-sm ml-1 text-[var(--text-muted)]">{unit}</span></p>
