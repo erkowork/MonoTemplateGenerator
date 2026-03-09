@@ -1,9 +1,40 @@
-<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="8" fill="#222831"/>
-  <circle cx="16" cy="16" r="10" stroke="#d65a31" stroke-width="2"/>
-  <path d="M16 6V10" stroke="#d65a31" stroke-width="2" stroke-linecap="round"/>
-  <path d="M16 22V26" stroke="#d65a31" stroke-width="2" stroke-linecap="round"/>
-  <path d="M26 16H22" stroke="#d65a31" stroke-width="2" stroke-linecap="round"/>
-  <path d="M10 16H6" stroke="#d65a31" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="16" cy="16" r="3" fill="#eeeeee"/>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background with slight gradient for quality feel -->
+  <rect width="512" height="512" rx="114" fill="#B0BEC5"/>
+  <rect width="512" height="512" rx="114" fill="url(#paint0_linear)" fill-opacity="0.2"/>
+  
+  <!-- Base dashed ellipse -->
+  <ellipse cx="256" cy="360" rx="180" ry="70" stroke="#546E7A" stroke-width="3" stroke-dasharray="10 10" opacity="0.6"/>
+  
+  <!-- Vertical connecting lines -->
+  <g opacity="0.5">
+    <line x1="76" y1="200" x2="76" y2="360" stroke="#FF8A65" stroke-width="2"/>
+    <line x1="126" y1="145" x2="126" y2="310" stroke="#FF8A65" stroke-width="2"/>
+    <line x1="256" y1="120" x2="256" y2="290" stroke="#FF8A65" stroke-width="2"/>
+    <line x1="386" y1="145" x2="386" y2="310" stroke="#FF8A65" stroke-width="2"/>
+    <line x1="436" y1="200" x2="436" y2="360" stroke="#FF8A65" stroke-width="2"/>
+    <line x1="386" y1="255" x2="386" y2="410" stroke="#FF8A65" stroke-width="2"/>
+    <line x1="256" y1="280" x2="256" y2="430" stroke="#FF8A65" stroke-width="2"/>
+    <line x1="126" y1="255" x2="126" y2="410" stroke="#FF8A65" stroke-width="2"/>
+  </g>
+
+  <!-- Top Ring -->
+  <ellipse cx="256" cy="200" rx="180" ry="80" stroke="#37474F" stroke-width="10"/>
+  
+  <!-- Nodes (Dots) -->
+  <circle cx="76" cy="200" r="12" fill="#FF7043"/>
+  <circle cx="126" cy="145" r="12" fill="#FF7043"/>
+  <circle cx="256" cy="120" r="12" fill="#FF7043"/>
+  <circle cx="386" cy="145" r="12" fill="#FF7043"/>
+  <circle cx="436" cy="200" r="12" fill="#FF7043"/>
+  <circle cx="386" cy="255" r="12" fill="#FF7043"/>
+  <circle cx="256" cy="280" r="12" fill="#FF7043"/>
+  <circle cx="126" cy="255" r="12" fill="#FF7043"/>
+
+  <defs>
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white"/>
+      <stop offset="1" stop-color="#263238"/>
+    </linearGradient>
+  </defs>
 </svg>
